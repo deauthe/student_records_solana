@@ -15,7 +15,7 @@ export function StudentRecordsCreate() {
 	return (
 		<button
 			className="btn btn-xs lg:btn-md btn-primary"
-			onClick={() => initialize.mutateAsync(Keypair.generate())}
+			onClick={() => initialize.mutateAsync()}
 			disabled={initialize.isPending}
 		>
 			Create {initialize.isPending && "..."}
