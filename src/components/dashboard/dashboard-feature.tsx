@@ -17,6 +17,7 @@ import { useConnection } from "@solana/wallet-adapter-react";
 import { useCluster } from "../cluster/cluster-data-access";
 import { useAnchorProvider } from "../solana/solana-provider";
 import { useQuery } from "@tanstack/react-query";
+import { StudentRecordsList } from "../student_records/student_records-ui";
 
 export default function DashboardFeature() {
 	const { connection } = useConnection();
@@ -92,6 +93,30 @@ export default function DashboardFeature() {
 				gpa: student.gpa,
 				name: student.name,
 				rollNo: student.rollNo,
+			});
+		}
+	};
+
+	const updateStudent = ({
+		student,
+	}: {
+		student: {
+			name?: string;
+			rollNo?: string;
+			gpa?: number;
+		};
+	}) => {
+		if (!student.name || !student.rollNo || !student.gpa) {
+			toast.error(
+				"please enter all details for the student before updating it"
+			);
+		} else if (!studentPda) {
+			toast.error("student not found");
+		} else {
+			updateStudentMutation.mutateAsync({
+				rollNo: student.rollNo,
+				gpa: student.gpa,
+				name: student.name,
 			});
 		}
 	};
@@ -211,7 +236,9 @@ export default function DashboardFeature() {
 							className="input-bordered input"
 							onChange={(e) => setStudentRollNo(e.target.value)}
 						/>
-						<div className="kbd-lg">{accountQuery.data}</div>
+						<div className="">
+							<StudentRecordsList />
+						</div>
 						<div className="grid md:grid-cols-2 gap-5 ">
 							<button className="btn btn-primary">Create</button>
 						</div>
@@ -230,14 +257,15 @@ export default function DashboardFeature() {
 						/>
 						<input
 							type="text"
-							placeholder="gpa"
-							className="input-bordered input"
+							placeholder="rollNo"
+							className="input input-bordered"
 						/>
 						<input
 							type="text"
-							placeholder="Achievements separated by a comma"
+							placeholder="gpa"
 							className="input-bordered input"
 						/>
+
 						<div className="grid md:grid-cols-2 gap-5 ">
 							<button className="btn btn-primary">Create</button>
 						</div>
@@ -278,7 +306,7 @@ export default function DashboardFeature() {
 						/>
 						<input
 							type="text"
-							placeholder="public key address"
+							placeholder="rollNo"
 							className="input-bordered input"
 						/>
 						<div className="grid md:grid-cols-2 gap-5 ">

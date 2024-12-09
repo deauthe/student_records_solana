@@ -33,7 +33,6 @@ pub fn add_authority(ctx: Context<AddAuthority>, authority: Pubkey) -> Result<()
     Ok(())
 }
 
-
 #[derive(Accounts)]
 pub struct InitializeAuthorityGroup<'info> {
     #[account(init, payer = initializer, space = 8 + AuthorityGroup::INIT_SPACE, seeds = [AuthorityGroup::SEED_PREFIX], bump)]

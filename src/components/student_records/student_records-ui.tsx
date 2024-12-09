@@ -4,10 +4,7 @@ import { Keypair, PublicKey } from "@solana/web3.js";
 import { useMemo } from "react";
 import { ellipsify } from "../ui/ui-layout";
 import { ExplorerLink } from "../cluster/cluster-ui";
-import {
-	useStudentRecordsProgram,
-	useStudentRecordsProgramAccount,
-} from "./data-access";
+import { useStudentRecordsProgram, useStudentAccount } from "./data-access";
 
 export function StudentRecordsCreate() {
 	const { initialize } = useStudentRecordsProgram();
@@ -27,11 +24,11 @@ export function StudentRecordsList() {
 	const { accounts, getProgramAccount } = useStudentRecordsProgram();
 
 	if (getProgramAccount.isLoading) {
-		return <span className="loading loading-spinner loading-lg"></span>;
+		return <span className="loading loading-spinner loading-lg "></span>;
 	}
 	if (!getProgramAccount.data?.value) {
 		return (
-			<div className="alert alert-info flex justify-center">
+			<div className="alert alert-info flex justify-center size">
 				<span>
 					Program account not found. Make sure you have deployed the program and
 					are on the correct cluster.
@@ -63,68 +60,49 @@ export function StudentRecordsList() {
 }
 
 function StudentRecordsCard({ account }: { account: PublicKey }) {
-	const {
-		accountQuery,
-		incrementMutation,
-		setMutation,
-		decrementMutation,
-		closeMutation,
-	} = useStudentRecordsProgramAccount({
+	const { accountQuery } = useStudentAccount({
 		account,
 	});
 
-	const count = useMemo(
-		() => accountQuery.data?.count ?? 0,
-		[accountQuery.data?.count]
+	const rollNo = useMemo(
+		() => accountQuery.data?.rollNo ?? 0,
+		[accountQuery.data?.rollNo]
+	);
+	const name = useMemo(
+		() => accountQuery.data?.name ?? 0,
+		[accountQuery.data?.name]
+	);
+	const authorities = useMemo(
+		() => accountQuery.data?.authority ?? 0,
+		[accountQuery.data?.authority]
+	);
+	const gpa = useMemo(
+		() => accountQuery.data?.gpa ?? 0,
+		[accountQuery.data?.gpa]
 	);
 
 	return accountQuery.isLoading ? (
 		<span className="loading loading-spinner loading-lg"></span>
 	) : (
-		<div className="card card-bordered border-base-300 border-4 text-neutral-content">
-			<div className="card-body items-center text-center">
-				<div className="space-y-6">
-					<h2
-						className="card-title justify-center text-3xl cursor-pointer"
-						onClick={() => accountQuery.refetch()}
-					>
-						{count}
-					</h2>
-					<div className="card-actions justify-around">
-						<button
-							className="btn btn-xs lg:btn-md btn-outline"
-							onClick={() => incrementMutation.mutateAsync()}
-							disabled={incrementMutation.isPending}
+		<div className="card card-bordered p-4 border-base-300 border-4 text-neutral-content">
+			<h2
+				className="card-title text-3xl cursor-pointer"
+				onClick={() => accountQuery.refetch()}
+			>
+				{name}
+			</h2>
+			<div className="card-body  items-start p-0 text-left">
+				<div className="space-y-6 ">
+					<div className="flex flex-col gap-3">
+						<h3
+							className="justify-start pt-5 text-xl font-bold"
+							onClick={() => accountQuery.refetch()}
 						>
-							Increment
-						</button>
-						<button
-							className="btn btn-xs lg:btn-md btn-outline"
-							onClick={() => {
-								const value = window.prompt(
-									"Set value to:",
-									count.toString() ?? "0"
-								);
-								if (
-									!value ||
-									parseInt(value) === count ||
-									isNaN(parseInt(value))
-								) {
-									return;
-								}
-								return setMutation.mutateAsync(parseInt(value));
-							}}
-							disabled={setMutation.isPending}
-						>
-							Set
-						</button>
-						<button
-							className="btn btn-xs lg:btn-md btn-outline"
-							onClick={() => decrementMutation.mutateAsync()}
-							disabled={decrementMutation.isPending}
-						>
-							Decrement
-						</button>
+							Roll no : <span className="kbd kbd-lg">{rollNo}</span>
+						</h3>
+						<h3 className="" onClick={() => accountQuery.refetch()}>
+							GPA : <span className="kbd kbd-lg ">{gpa}</span>
+						</h3>
 					</div>
 					<div className="text-center space-y-4">
 						<p>
@@ -133,22 +111,6 @@ function StudentRecordsCard({ account }: { account: PublicKey }) {
 								label={ellipsify(account.toString())}
 							/>
 						</p>
-						<button
-							className="btn btn-xs btn-secondary btn-outline"
-							onClick={() => {
-								if (
-									!window.confirm(
-										"Are you sure you want to close this account?"
-									)
-								) {
-									return;
-								}
-								return closeMutation.mutateAsync();
-							}}
-							disabled={closeMutation.isPending}
-						>
-							Close
-						</button>
 					</div>
 				</div>
 			</div>

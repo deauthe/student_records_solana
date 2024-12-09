@@ -20,7 +20,6 @@ pub mod student_records {
 
     pub fn intialize_contract(ctx: Context<InitializeContract>) -> Result<()> {
         contract::intialize_contract(ctx)
-
     }
 
     pub fn initialize_student(
@@ -43,8 +42,13 @@ pub mod student_records {
         authority::add_authority(ctx, authority)
     }
 
-    pub fn update_student(ctx: Context<UpdateStudent>, name: String, gpa: u8) -> Result<()> {
-        student::update_student(ctx, name, gpa)
+    pub fn update_student(
+        ctx: Context<UpdateStudent>,
+        roll_no: String,
+        name: String,
+        gpa: u8,
+    ) -> Result<()> {
+        student::update_student(ctx, roll_no, name, gpa)
     }
 
     pub fn add_achievement(ctx: Context<AddAchievement>, achievement: String) -> Result<()> {

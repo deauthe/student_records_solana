@@ -182,6 +182,10 @@ export type StudentRecords = {
                   110,
                   116
                 ]
+              },
+              {
+                "kind": "arg",
+                "path": "rollNo"
               }
             ]
           }
@@ -301,6 +305,10 @@ export type StudentRecords = {
                   110,
                   116
                 ]
+              },
+              {
+                "kind": "arg",
+                "path": "rollNo"
               }
             ]
           }
@@ -316,6 +324,10 @@ export type StudentRecords = {
         }
       ],
       "args": [
+        {
+          "name": "rollNo",
+          "type": "string"
+        },
         {
           "name": "name",
           "type": "string"

@@ -10,5 +10,5 @@ pub struct Student {
     #[max_len(6, 20)]
     pub achievements: Vec<String>,
     #[max_len(20)]
-    pub roll_no : String,
+    pub roll_no: String,
 }

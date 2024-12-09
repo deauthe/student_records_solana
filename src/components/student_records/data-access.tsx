@@ -52,6 +52,11 @@ export function useStudentRecordsProgram() {
 				.accounts({ user: program.provider.publicKey })
 				.rpc();
 		},
+		onSuccess: (signature) => {
+			transactionToast(signature);
+			return accounts.refetch();
+		},
+		onError: (e) => toast.error("Failed to initialize contract" + e.message),
 	});
 
 	const addStudentMutation = useMutation({
@@ -129,9 +134,17 @@ export function useStudentAccount({ account }: { account: PublicKey }) {
 
 	const updateStudentMutation = useMutation({
 		mutationKey: ["student_records", "updateStudent", { cluster, account }],
-		mutationFn: async ({ name, gpa }: { name: string; gpa: number }) => {
+		mutationFn: async ({
+			rollNo,
+			name,
+			gpa,
+		}: {
+			rollNo: string;
+			name: string;
+			gpa: number;
+		}) => {
 			return await program.methods
-				.updateStudent(name, gpa)
+				.updateStudent(rollNo, name, gpa)
 				.accounts({
 					authority: program.provider.publicKey,
 					authorityGroup: authorityGroupPda,

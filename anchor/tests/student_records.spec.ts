@@ -39,6 +39,10 @@ describe("student_records", () => {
 	});
 
 	it("Initializes the contract state", async () => {
+		const [statePda, stateBump] = PublicKey.findProgramAddressSync(
+			[Buffer.from("state")],
+			program.programId
+		);
 		await program.methods
 			.intializeContract()
 			.accountsStrict({
@@ -49,32 +53,49 @@ describe("student_records", () => {
 			.rpc();
 
 		const state = await program.account.contract.fetch(contractStatePda);
+		expect(statePda).toEqual(
+			(await program.account.contract.all()).at(0)?.publicKey
+		);
 		expect(state.students.toNumber()).toEqual(0);
 		expect(state.studentsList).toHaveLength(0);
 	});
 
 	it("Initializes a student", async () => {
-		const rollNo = "12345"; // Student roll number
-		const studentSeed = anchor.utils.bytes.utf8.encode("student");
-		const studentRollNo = anchor.utils.bytes.utf8.encode(rollNo);
+		// Student details
+		const rollNo = "12345";
+		const name = "John Doe";
+		const gpa = 7;
 
-		// Calculate the student PDA
-		const [studentPda, studentBump] = await PublicKey.findProgramAddress(
-			[studentSeed],
+		// Derive the student PDA
+		const [studentPda, _bump] = PublicKey.findProgramAddressSync(
+			[Buffer.from("student"), Buffer.from(rollNo)],
+			program.programId
+		);
+
+		const [statePda, stateBump] = PublicKey.findProgramAddressSync(
+			[Buffer.from("state")],
 			program.programId
 		);
 		console.log("student PDA:", studentPda.toBase58());
+		console.log("state Pda", statePda.toBase58());
 
 		// Call the program method to initialize the student
 		await program.methods
-			.initializeStudent("John Doe", 7, rollNo)
-			.accounts({
+			.initializeStudent(name, gpa, rollNo)
+			.accountsStrict({
+				student: studentPda,
+				contractState: statePda,
+				systemProgram: SystemProgram.programId,
 				authority: payer.publicKey,
 			})
 			.rpc();
 
 		// Fetch the initialized student account
 		const student = await program.account.student.fetch(studentPda);
+		const fetchedStudentPda = (await program.account.student.all()).at(
+			0
+		)?.publicKey;
+		expect(studentPda).toEqual(fetchedStudentPda);
 		expect(student.name).toEqual("John Doe");
 		expect(student.gpa).toEqual(7); // Corrected value (to match test input)
 		expect(student.rollNo).toEqual(rollNo);
@@ -101,16 +122,16 @@ describe("student_records", () => {
 	it("Updates a student", async () => {
 		const rollNo = "12345"; // Use the same roll number from initialization
 		const studentSeed = Buffer.from("student");
-		const studentRollNo = Buffer.from(rollNo);
+		const rollNoBuffer = Buffer.from(rollNo);
 
 		// Recalculate the student PDA
 		const [studentPda] = await PublicKey.findProgramAddress(
-			[studentSeed],
+			[studentSeed, rollNoBuffer],
 			program.programId
 		);
 
 		await program.methods
-			.updateStudent("Jane Doe", 9)
+			.updateStudent(rollNo, "Jane Doe", 9)
 			.accounts({
 				authority: payer.publicKey,
 				authorityGroup: authorityGroupPda,
@@ -125,11 +146,11 @@ describe("student_records", () => {
 	it("Adds an achievement for a student", async () => {
 		const rollNo = "12345"; // Use the same roll number from initialization
 		const studentSeed = Buffer.from("student");
-		const studentRollNo = Buffer.from(rollNo);
+		const rollNoBuffer = Buffer.from(rollNo);
 
 		// Recalculate the student PDA
 		const [studentPda] = await PublicKey.findProgramAddress(
-			[studentSeed],
+			[studentSeed, rollNoBuffer],
 			program.programId
 		);
 
